@@ -1,0 +1,224 @@
+
+
+
+
+ICNRG Working Group                                             I. Solis
+Internet-Draft                                                   C. Wood
+Intended status: Informational                                      PARC
+Expires: April 16, 2016                                 October 14, 2015
+
+
+                       CCNx Link Local Resources
+                draft-wood-icnrg-ccnxlinklocalresources
+
+Abstract
+
+   A CCNx link local name is one that only has meaning for a link
+   between two CCNx forwarders.  These names can be used (in Interests)
+   to get and set link local resources about a link.  A resource is a
+   piece of information such as the link MTU that is influences the
+   behavior of the link used by two or more peers.  This document
+   describes how the type and format of link-local names and how they
+   are used to manipulate link local resources.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on April 16, 2016.
+
+Copyright Notice
+
+   Copyright (c) 2015 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+
+
+
+Solis & Wood             Expires April 16, 2016                 [Page 1]
+
+Internet-Draft           CCNx-LinkLocalResources            October 2015
+
+
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.1.  Conventions and Terminology . . . . . . . . . . . . . . .   2
+   2.  Link Local Name Format  . . . . . . . . . . . . . . . . . . .   3
+   3.  Link Local Resources  . . . . . . . . . . . . . . . . . . . .   3
+   4.  Link Local Resource Operations  . . . . . . . . . . . . . . .   3
+   5.  Sender Identifiers  . . . . . . . . . . . . . . . . . . . . .   3
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
+   7.  Normative References  . . . . . . . . . . . . . . . . . . . .   4
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   4
+
+1.  Introduction
+
+   CCNx link local names are CCNx names given to Interest and Content
+   Objects that transfer resource information and perform resource
+   operations between two peers over a single link.  A link can be both
+   point-to-point and multicast.  Thus, at a minimum, a link local name
+   must contain:
+
+   1.  The name of the target resource.
+
+   2.  The operation to be perform on a given resource.
+
+   3.  A unique identifier of the sender of an Interest with a link
+       local name.
+
+1.1.  Conventions and Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in RFC
+   2119 [RFC2119].
+
+   Peer: A CCNx forwarder.
+
+   Link: A connection between two peers.
+
+   Heartbeat: A keep-alive message that is sent between two peers to
+   maintain the link.
+
+
+
+
+
+
+
+
+Solis & Wood             Expires April 16, 2016                 [Page 2]
+
+Internet-Draft           CCNx-LinkLocalResources            October 2015
+
+
+2.  Link Local Name Format
+
+   The format of a link local name is given below.
+
+   lci:/local/link/<identifier>/<operation>/<resource>
+
+3.  Link Local Resources
+
+   The following set of resources are available for any link:
+
+   +----------------------+--------------------------------------------+
+   | Resource Name        | Resource Description                       |
+   +----------------------+--------------------------------------------+
+   | LINK                 | The local link                             |
+   |                      |                                            |
+   | MTU                  | The link MTU                               |
+   |                      |                                            |
+   | FragmentationStart   | The starting fragmentation number          |
+   |                      |                                            |
+   | FragmentationSeqSize | The size of the sequence number field in a |
+   |                      | CCNx message                               |
+   |                      |                                            |
+   | Heartbeat            | A heartbeat message                        |
+   |                      |                                            |
+   | HeartbeatFrequency   | The frequency at which heartbeat messages  |
+   |                      | are sent (in seconds)                      |
+   +----------------------+--------------------------------------------+
+
+4.  Link Local Resource Operations
+
+   The following resource operations can be performed by clients
+   (consumers).
+
+   o  GET: Retrieve the (set of) values for the target resource.
+
+   o  SET: Make a selection from a set of resource values.
+
+   o  DELETE: Delete a given resource.  Some resources are artificial
+      and cannot be deleted (e.g., Compression algorithm), whereas
+      others are real and can be deleted (e.g., Links).
+
+5.  Sender Identifiers
+
+   The sender of an Interest with a link local name must include an
+   unique identifier.  This identifier is a random 32-bit nonce
+   generated by the consumer when the link is created.  For 1-n
+   multicast links (e.g., WiFi), a forwarder must take care to guarantee
+   uniqueness among client (sender) identifiers.
+
+
+
+Solis & Wood             Expires April 16, 2016                 [Page 3]
+
+Internet-Draft           CCNx-LinkLocalResources            October 2015
+
+
+6.  Security Considerations
+
+   All link local operations (e.g., GET, SET, DELETE) must only be
+   performed if the sending party is trusted.  Link local operations
+   will not be performed upon request from untrusted and unauthenticated
+   clients.
+
+7.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <http://www.rfc-editor.org/info/rfc2119>.
+
+Authors' Addresses
+
+   Ignacio Solis
+   PARC
+
+   Email: ignacio.solis@parc.com
+
+
+   Christopher A. Wood
+   PARC
+
+   Email: christopher.wood@parc.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Solis & Wood             Expires April 16, 2016                 [Page 4]
